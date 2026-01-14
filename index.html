@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>X–Y Graph Plotter</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -10,16 +11,49 @@
     body {
         font-family: Arial, sans-serif;
         background: #eef2f5;
-        padding: 20px;
+        margin: 0;
+        padding: 10px;
     }
 
     h2 {
         text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .controls {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    input {
+        padding: 6px;
+        width: 120px;
+    }
+
+    button {
+        padding: 10px 14px;
+        cursor: pointer;
+    }
+
+    .layout {
+        display: flex;
+        gap: 15px;
     }
 
     table {
-        margin: auto;
         border-collapse: collapse;
+        width: 100%;
     }
 
     th, td {
@@ -28,60 +62,78 @@
         text-align: center;
     }
 
-    input {
-        width: 80px;
-        padding: 4px;
-    }
-
-    .controls {
-        text-align: center;
-        margin: 15px;
-    }
-
-    button {
-        padding: 8px 14px;
-        margin: 4px;
-        cursor: pointer;
-    }
-
     canvas {
         background: white;
-        display: block;
-        margin: auto;
-        max-width: 90%;
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    /* 📱 MOBILE VIEW */
+    @media (max-width: 768px) {
+        .layout {
+            flex-direction: column;
+        }
+
+        input {
+            width: 100%;
+        }
+
+        button {
+            width: 100%;
+        }
+    }
+
+    /* 🖥 DESKTOP VIEW */
+    @media (min-width: 769px) {
+        .layout {
+            flex-direction: row;
+        }
+
+        .table-box {
+            width: 35%;
+        }
+
+        .graph-box {
+            width: 65%;
+        }
     }
 </style>
 </head>
 
 <body>
 
-<h2>X–Y Data Graph Plotter</h2>
+<div class="container">
+
+<h2>X–Y Graph Plotter</h2>
 
 <div class="controls">
-    X-axis Label: <input id="xLabel" value="X-axis">
-    Y-axis Label: <input id="yLabel" value="Y-axis">
-</div>
-
-<div class="controls">
+    <input id="xLabel" placeholder="X-axis label" value="X-axis">
+    <input id="yLabel" placeholder="Y-axis label" value="Y-axis">
     <button onclick="addRow()">Add Row</button>
     <button onclick="plotGraph()">Plot Graph</button>
-    <button onclick="downloadGraph()">Download Image</button>
+    <button onclick="downloadGraph()">Download</button>
 </div>
 
-<table id="dataTable">
-    <tr>
-        <th>X</th>
-        <th>Y</th>
-    </tr>
-    <tr>
-        <td><input type="number"></td>
-        <td><input type="number"></td>
-    </tr>
-</table>
+<div class="layout">
+    <div class="table-box">
+        <table id="dataTable">
+            <tr>
+                <th>X</th>
+                <th>Y</th>
+            </tr>
+            <tr>
+                <td><input type="number"></td>
+                <td><input type="number"></td>
+            </tr>
+        </table>
+    </div>
 
-<br>
+    <div class="graph-box">
+        <canvas id="graph"></canvas>
+    </div>
+</div>
 
-<canvas id="graph"></canvas>
+</div>
 
 <script>
 let chart;
@@ -105,7 +157,7 @@ function plotGraph() {
 
         if (xv !== "" && yv !== "") {
             x.push(xv);
-            y.push(Math.abs(yv)); // removes minus sign
+            y.push(Math.abs(yv));
         }
     }
 
@@ -118,12 +170,14 @@ function plotGraph() {
             datasets: [{
                 label: "Y vs X",
                 data: y,
-                pointRadius: 5,
+                pointRadius: 4,
                 borderWidth: 2,
                 fill: false
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 x: {
                     title: {
