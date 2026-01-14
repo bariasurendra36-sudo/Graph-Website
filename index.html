@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>X–Y Graph Plotter</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #eef2f5;
+        padding: 20px;
+    }
+
+    h2 {
+        text-align: center;
+    }
+
+    table {
+        margin: auto;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #333;
+        padding: 6px;
+        text-align: center;
+    }
+
+    input {
+        width: 80px;
+        padding: 4px;
+    }
+
+    .controls {
+        text-align: center;
+        margin: 15px;
+    }
+
+    button {
+        padding: 8px 14px;
+        margin: 4px;
+        cursor: pointer;
+    }
+
+    canvas {
+        background: white;
+        display: block;
+        margin: auto;
+        max-width: 90%;
+    }
+</style>
+</head>
+
+<body>
+
+<h2>X–Y Data Graph Plotter</h2>
+
+<div class="controls">
+    X-axis Label: <input id="xLabel" value="X-axis">
+    Y-axis Label: <input id="yLabel" value="Y-axis">
+</div>
+
+<div class="controls">
+    <button onclick="addRow()">Add Row</button>
+    <button onclick="plotGraph()">Plot Graph</button>
+    <button onclick="downloadGraph()">Download Image</button>
+</div>
+
+<table id="dataTable">
+    <tr>
+        <th>X</th>
+        <th>Y</th>
+    </tr>
+    <tr>
+        <td><input type="number"></td>
+        <td><input type="number"></td>
+    </tr>
+</table>
+
+<br>
+
+<canvas id="graph"></canvas>
+
+<script>
+let chart;
+
+function addRow() {
+    let table = document.getElementById("dataTable");
+    let row = table.insertRow();
+    row.insertCell(0).innerHTML = '<input type="number">';
+    row.insertCell(1).innerHTML = '<input type="number">';
+}
+
+function plotGraph() {
+    let x = [];
+    let y = [];
+
+    let table = document.getElementById("dataTable");
+
+    for (let i = 1; i < table.rows.length; i++) {
+        let xv = table.rows[i].cells[0].children[0].value;
+        let yv = table.rows[i].cells[1].children[0].value;
+
+        if (xv !== "" && yv !== "") {
+            x.push(xv);
+            y.push(Math.abs(yv)); // removes minus sign
+        }
+    }
+
+    if (chart) chart.destroy();
+
+    chart = new Chart(document.getElementById("graph"), {
+        type: "line",
+        data: {
+            labels: x,
+            datasets: [{
+                label: "Y vs X",
+                data: y,
+                pointRadius: 5,
+                borderWidth: 2,
+                fill: false
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: document.getElementById("xLabel").value
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: document.getElementById("yLabel").value
+                    }
+                }
+            }
+        }
+    });
+}
+
+function downloadGraph() {
+    let link = document.createElement("a");
+    link.download = "graph.png";
+    link.href = document.getElementById("graph").toDataURL();
+    link.click();
+}
+</script>
+
+</body>
+</html>
